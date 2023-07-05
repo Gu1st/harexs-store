@@ -3,7 +3,7 @@
 > Easily load and persist config(study for configstore)
 
 ### Install
-> npm intall harexs-store
+> npm install harexs-store
 
 ### Usage
 
