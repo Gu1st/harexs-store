@@ -1,4 +1,11 @@
-import store from "./index";
+### harexs-store
+
+> Easily load and persist config(study for configstore)
+
+### Usage
+
+```javascript
+import harexsStore from "harexs-store";
 
 const harexsStore = store("harexs");
 
@@ -19,3 +26,4 @@ console.log(harexsStore.get("js")); //=>undefined
 harexsStore.set("js.ts", [1, 2, 3]);
 
 console.log(harexsStore.get("js.ts")); //=>[1, 2, 3]
+```

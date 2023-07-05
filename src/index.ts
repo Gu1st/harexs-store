@@ -1,14 +1,11 @@
 import * as os from "node:os";
 import * as path from "node:path";
 import * as fs from "node:fs";
+import { initData, splitSet, splitGet, splitRemove } from "./utils";
+import type { OptionsType } from "./type";
 
 let Path = path.join(os.homedir(), ".harexsStore.json"); //默认用户目录下的指定文件
 const getFileErrorMessage = "读取存储文件失败";
-
-interface OptionsType {
-  configPath?: string;
-  pathPrefix?: string;
-}
 
 export default function harexsStore(
   id: string,
@@ -78,54 +75,22 @@ export default function harexsStore(
 
   const set = (key: string, val: any) => (allProxy[key] = val);
 
-  const has = (key: string) => allProxy[key];
+  const has = (key: string) => !!allProxy[key];
 
-  const remove = (key: string) => delete allProxy[key];
+  const remove = (key: string) => {
+    let obj = JSON.parse(fs.readFileSync(Path, "utf8"));
+    splitRemove(obj, key);
+    fs.writeFileSync(Path, JSON.stringify(obj, null, "\t"));
+    return true;
+  };
 
   const clear = () => (allProxy = Object.create(null));
 
   return {
-    all: allProxy,
     get,
     set,
     has,
     remove,
     clear,
   };
-}
-
-function isObject(obj: Record<string, any>) {
-  return obj !== null && typeof obj === "object";
-}
-
-function initData(Path: string) {
-  if (fs.existsSync(Path)) {
-    return JSON.parse(fs.readFileSync(Path, "utf8"));
-  }
-  return {};
-}
-
-function splitSet(obj: Record<string, any>, key: string, val: any) {
-  let allKey = key.split(".");
-  for (let i = 0; i < allKey.length; i++) {
-    let key = allKey[i];
-    let keyVal = obj[key];
-
-    // 没到最后一项遍历就不存在则初始化这个对象
-    if (!isObject(keyVal)) obj[key] = {};
-    if (i === allKey.length - 1) obj[key] = val;
-    obj = obj[key];
-  }
-}
-function splitGet(obj: Record<string, any>, key: string) {
-  let allKey = key.split(".");
-
-  for (let i = 0; i < allKey.length; i++) {
-    let key = allKey[i];
-    let keyVal = obj[key];
-    //找到不为对象的值 则提前终止
-    if (!isObject(keyVal) && i > 0) return obj[key];
-    obj = obj[key];
-  }
-  return obj;
 }

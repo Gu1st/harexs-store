@@ -1,7 +1,7 @@
 {
   "name": "harexs-store",
   "version": "1.0.0",
-  "description": "",
+  "description": "Easily load and persist config",
   "main": "./dist/index.cjs",
   "type": "module",
   "types": "./dist/index.d.ts",
