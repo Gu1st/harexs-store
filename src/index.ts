@@ -2,7 +2,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import * as fs from "node:fs";
 
-const harexsDir = path.join(os.homedir(), ".harexsStore.json"); //默认用户目录下的指定文件
+let Path = path.join(os.homedir(), ".harexsStore.json"); //默认用户目录下的指定文件
 const getFileErrorMessage = "读取存储文件失败";
 
 interface OptionsType {
@@ -15,22 +15,28 @@ export default function harexsStore(
   defaultsObj?: Record<string, any>,
   options?: OptionsType
 ) {
-  let Path = "";
-  let _all = {};
-
+  //指定ID文件
+  Path = path.join(os.homedir(), `${id}.json`);
   // 如果用户有指定默认目录
-  Path = harexsDir;
   if (options?.pathPrefix)
     Path = path.join(os.homedir(), options!.pathPrefix, `${id}.json`);
   if (options?.configPath) Path = path.join(options!.configPath, `${id}.json`);
+
+  //初始化对象
+  let _all = initData(Path);
 
   // 劫持对象夹子
   let allProxy = new Proxy(_all, {
     get(target: Record<string, any>, key: string) {
       try {
-        const obj = JSON.parse(fs.readFileSync(Path, "utf8"));
-        return Reflect.get(obj, key);
+        let obj = JSON.parse(fs.readFileSync(Path, "utf8"));
+        //分割判断返回
+        return splitGet(obj, key);
       } catch (err: any) {
+        //文件不存在
+        if (err.code === "ENOENT") {
+          return {};
+        }
         if (err.name === "SyntaxError") {
           fs.writeFileSync(Path, "", "utf-8");
           return {};
@@ -51,10 +57,9 @@ export default function harexsStore(
         }
 
         //读出整个对象
-        const obj = JSON.parse(fs.readFileSync(Path, "utf8"));
-        //修改某个属性
-        Reflect.set(obj, key, val);
-        Reflect.set(target, key, val);
+        let obj = JSON.parse(fs.readFileSync(Path, "utf8"));
+        //分割处理
+        splitSet(obj, key, val);
         //重新存储整个对象
         fs.writeFileSync(Path, JSON.stringify(obj, null, "\t"));
         return true;
@@ -87,4 +92,40 @@ export default function harexsStore(
     remove,
     clear,
   };
+}
+
+function isObject(obj: Record<string, any>) {
+  return obj !== null && typeof obj === "object";
+}
+
+function initData(Path: string) {
+  if (fs.existsSync(Path)) {
+    return JSON.parse(fs.readFileSync(Path, "utf8"));
+  }
+  return {};
+}
+
+function splitSet(obj: Record<string, any>, key: string, val: any) {
+  let allKey = key.split(".");
+  for (let i = 0; i < allKey.length; i++) {
+    let key = allKey[i];
+    let keyVal = obj[key];
+
+    // 没到最后一项遍历就不存在则初始化这个对象
+    if (!isObject(keyVal)) obj[key] = {};
+    if (i === allKey.length - 1) obj[key] = val;
+    obj = obj[key];
+  }
+}
+function splitGet(obj: Record<string, any>, key: string) {
+  let allKey = key.split(".");
+
+  for (let i = 0; i < allKey.length; i++) {
+    let key = allKey[i];
+    let keyVal = obj[key];
+    //找到不为对象的值 则提前终止
+    if (!isObject(keyVal) && i > 0) return obj[key];
+    obj = obj[key];
+  }
+  return obj;
 }

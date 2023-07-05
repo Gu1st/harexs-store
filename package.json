@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "unbuild",
+    "play":"esno src/play.ts",
     "commit": "git-cz"
   },
   "keywords": [],
@@ -23,6 +24,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.3.3",
+    "esno": "^0.16.3",
     "git-cz": "^4.9.0",
     "typescript": "^5.1.6",
     "unbuild": "^1.2.1"
