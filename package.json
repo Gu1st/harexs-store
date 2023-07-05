@@ -1,0 +1,29 @@
+{
+  "name": "harexs-store",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.cjs",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "unbuild",
+    "commit":"git-cz"
+  },
+  "keywords": [],
+  "author": "Harexs",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.3.3",
+    "typescript": "^5.1.6",
+    "unbuild": "^1.2.1"
+  }
+}
