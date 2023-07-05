@@ -16,13 +16,14 @@
   },
   "scripts": {
     "build": "unbuild",
-    "commit":"git-cz"
+    "commit": "git-cz"
   },
   "keywords": [],
   "author": "Harexs",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.3.3",
+    "git-cz": "^4.9.0",
     "typescript": "^5.1.6",
     "unbuild": "^1.2.1"
   }
